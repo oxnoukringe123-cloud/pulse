@@ -1,18 +1,18 @@
 package com.pulse.app
 
 import android.os.Bundle
-import android.view.Gravity
-import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import com.pulse.app.ui.MainScreen
+import com.pulse.app.ui.PulseTheme
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val tv = TextView(this).apply {
-            text = "Pulse\nготово к разработке"
-            textSize = 22f
-            gravity = Gravity.CENTER
+        setContent {
+            PulseTheme {
+                MainScreen()
+            }
         }
-        setContentView(tv)
     }
 }
