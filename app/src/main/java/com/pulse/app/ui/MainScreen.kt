@@ -4,58 +4,50 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import com.pulse.app.model.ChannelType
 import com.pulse.app.model.MockData
 
 @Composable
 fun MainScreen() {
-    var personalMode by remember { mutableStateOf(false) }
     var selectedServerId by remember { mutableStateOf(MockData.servers.first().id) }
-    var selectedChannelId by remember { mutableStateOf(MockData.serverChannels.first().id) }
-    var chatTitle by remember { mutableStateOf("общий") }
-    var isChannel by remember { mutableStateOf(true) }
+    var selectedChatId by remember { mutableStateOf<String?>(null) }
+    var showAddDialog by remember { mutableStateOf(false) }
 
     val selectedServer = MockData.servers.first { it.id == selectedServerId }
+    val chats = MockData.chats
+    val selectedChat = chats.firstOrNull { it.id == selectedChatId }
 
     Row(modifier = Modifier.fillMaxSize().background(DarkBackground)) {
         ServerRail(
             selectedId = selectedServerId,
-            personalMode = personalMode,
+            personalMode = false,
             onSelectServer = {
-                personalMode = false
                 selectedServerId = it.id
-                isChannel = true
-                chatTitle = "общий"
-                selectedChannelId = MockData.serverChannels.first().id
             },
-            onOpenPersonal = {
-                personalMode = true
-                isChannel = false
-                chatTitle = "Аня"
-            },
+            onOpenPersonal = { /* пока отключено */ },
         )
 
         ChatListPanel(
-            title = if (personalMode) "Сообщения" else selectedServer.name,
-            channels = MockData.serverChannels,
-            personalChats = MockData.personalChats,
-            showChannels = !personalMode,
-            selectedChannelId = selectedChannelId,
-            onChannelClick = {
-                selectedChannelId = it.id
-                chatTitle = it.name
-                isChannel = it.type == ChannelType.TEXT
-            },
-            onChatClick = {
-                chatTitle = it.name
-                isChannel = false
-            }
+            title = selectedServer.name,
+            chats = chats,
+            selectedChatId = selectedChatId,
+            onChatClick = { selectedChatId = it.id },
+            onAddChat = { showAddDialog = true }
         )
 
         ChatView(
-            title = chatTitle,
-            isChannel = isChannel,
-            messages = MockData.messages
+            chatId = selectedChatId,
+            chatName = selectedChat?.name ?: "Чат"
+        )
+    }
+
+    if (showAddDialog) {
+        AddChatDialog(
+            onDismiss = { showAddDialog = false },
+            onCreate = { name ->
+                val chat = MockData.createChat(name)
+                selectedChatId = chat.id
+                showAddDialog = false
+            }
         )
     }
 }
